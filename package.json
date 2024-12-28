@@ -10,7 +10,12 @@
     "type": "git",
     "url": "git+https://github.com/moksh-tehlan/slack-build-notify-action.git"
   },
-  "keywords": ["github", "action", "slack", "notification"],
+  "keywords": [
+    "github",
+    "action",
+    "slack",
+    "notification"
+  ],
   "author": "Moksh Tehlan",
   "license": "ISC",
   "bugs": {

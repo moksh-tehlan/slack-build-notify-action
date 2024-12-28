@@ -1,6 +1,10 @@
 name: 'Slack Build Notify'
 description: 'Send build notifications and APK files to Slack'
 
+runs:
+  using: 'node16'
+  main: 'src/index.js'
+
 inputs:
   slack-webhook-url:
     description: 'Slack Webhook URL for notifications'
@@ -39,7 +43,3 @@ inputs:
     description: 'Comment to show with file upload'
     required: false
     default: '📱 APK file for build'
-
-runs:
-  using: 'node16'
-  main: 'src/index.js'
