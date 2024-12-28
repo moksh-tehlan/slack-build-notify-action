@@ -55,8 +55,8 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
             },
             data: {
                 files: [{
-                    id: file_id,
-                    title: fileName
+                    "id": file_id,
+                    "title": fileName
                 }],
                 channel_id: channel,
                 initial_comment: fileComment
