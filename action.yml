@@ -3,7 +3,7 @@ description: 'Send build notifications and APK files to Slack'
 
 runs:
   using: 'node16'
-  main: 'src/index.js'
+  main: 'dist/index.js'
 
 inputs:
   slack-webhook-url:
