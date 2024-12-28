@@ -34663,15 +34663,20 @@ const axios = __nccwpck_require__(7269);
 
 async function uploadFile(token, filePath, channel, fileName, fileComment) {
     try {
+        // Get exact file size
+        const fileStats = fs.statSync(filePath);
+        
         // Step 1: Get upload URL
-        const getUrlResponse = await axios.post('https://slack.com/api/files.getUploadURLExternal', {
-            filename: fileName,
-            length: fs.statSync(filePath).size,
-            alt_text: fileComment
-        }, {
+        const getUrlResponse = await axios({
+            method: 'post',
+            url: 'https://slack.com/api/files.getUploadURLExternal',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
+            },
+            data: {
+                filename: fileName,
+                length: fileStats.size
             }
         });
 
@@ -34679,29 +34684,40 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
             throw new Error(`Failed to get upload URL: ${getUrlResponse.data.error}`);
         }
 
-        // Step 2: Upload to the URL
         const { upload_url, file_id } = getUrlResponse.data;
-        const fileStream = fs.createReadStream(filePath);
-        const form = new src_FormData();
-        form.append('file', fileStream);
 
-        await axios.post(upload_url, form, {
-            headers: form.getHeaders()
+        // Step 2: Upload file to the URL
+        const form = new src_FormData();
+        form.append('file', fs.createReadStream(filePath));
+
+        const uploadResponse = await axios({
+            method: 'post',
+            url: upload_url,
+            headers: {
+                ...form.getHeaders()
+            },
+            data: form
         });
 
-        // Step 3: Complete the upload
-        const completeResponse = await axios.post('https://slack.com/api/files.completeUploadExternal', {
-            files: [{
-                id: file_id,
-                title: fileName,
-                alt_text: fileComment
-            }],
-            channel_ids: [channel],
-            initial_comment: fileComment
-        }, {
+        if (uploadResponse.status !== 200) {
+            throw new Error('Failed to upload file content');
+        }
+
+        // Step 3: Complete upload with channel sharing
+        const completeResponse = await axios({
+            method: 'post',
+            url: 'https://slack.com/api/files.completeUploadExternal',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
+            },
+            data: {
+                files: [{
+                    id: file_id,
+                    title: fileName
+                }],
+                channel_id: channel,
+                initial_comment: fileComment
             }
         });
 
@@ -34711,12 +34727,16 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
 
         return completeResponse.data;
     } catch (error) {
-        throw new Error(`File upload failed: ${error.message}`);
+        if (error.response?.data) {
+            console.error('API Error Details:', error.response.data);
+        }
+        throw error;
     }
 }
 
 async function run() {
     try {
+        // Get inputs
         const webhookUrl = core.getInput('slack-webhook-url');
         const token = core.getInput('slack-bot-token');
         const channel = core.getInput('channel');
@@ -34731,7 +34751,7 @@ async function run() {
 
         console.log('Sending build notification to Slack...');
 
-        // Send notification
+        // Send build notification
         await axios.post(webhookUrl, {
             blocks: [
                 {
@@ -34768,7 +34788,6 @@ async function run() {
 
         console.log('Uploading APK file to Slack...');
 
-        // Upload file using new process
         const fileName = `${appName}-${buildNumber}.apk`;
         await uploadFile(
             token,
