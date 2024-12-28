@@ -14,7 +14,7 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
             url: 'https://slack.com/api/files.getUploadURLExternal',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             data: {
                 filename: fileName,
