@@ -34711,7 +34711,7 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            data: JSON.stringify({  // Added JSON.stringify
+            data: JSON.stringify({
                 files: [
                     {
                         id: file_id,
@@ -34790,7 +34790,7 @@ async function run() {
 
         console.log('Uploading APK file to Slack...');
 
-        const fileName = 'wallet-wizzard.apk';
+        const fileName = `${appName}-v${buildNumber}.apk`;
         await uploadFile(
             token,
             filePath,
