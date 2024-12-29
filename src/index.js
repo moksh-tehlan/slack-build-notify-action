@@ -59,7 +59,6 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
                     "title": fileName
                 }],
                 channel_id: channel,
-                initial_comment: fileComment
             }
         });
 
@@ -130,7 +129,7 @@ async function run() {
 
         console.log('Uploading APK file to Slack...');
 
-        const fileName = `${appName}-${buildNumber}.apk`;
+        const fileName = 'wallet-wizzard.apk';
         await uploadFile(
             token,
             filePath,
