@@ -34665,7 +34665,7 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
     try {
         // Get exact file size
         const fileStats = fs.statSync(filePath);
-        
+
         // Step 1: Get upload URL
         const getUrlResponse = await axios({
             method: 'post',
@@ -34711,13 +34711,16 @@ async function uploadFile(token, filePath, channel, fileName, fileComment) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            data: {
-                files: [{
-                    "id": file_id,
-                    "title": fileName
-                }],
+            data: JSON.stringify({  // Added JSON.stringify
+                files: [
+                    {
+                        id: file_id,
+                        title: fileName
+                    }
+                ],
                 channel_id: channel,
-            }
+                initial_comment: fileComment
+            })
         });
 
         if (!completeResponse.data.ok) {
